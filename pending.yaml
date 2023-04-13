@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeapp-deployment-pending
+  labels:
+    app: nodeapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodeapp
+  template:
+    metadata:
+      labels:
+        app: nodeapp
+    spec:
+      containers:
+        - name: appa
+          image: n01479079/nginx-webserver:latest
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "10"
+              memory: "1Gi"

@@ -1,39 +1,49 @@
 pipeline {
- environment {
- imagename = “n01479079/cicd-jenkins-nginx”
- registryCredential = ‘adithya-docckerhub’
- dockerImage = ‘’
- }
- agent any
- stages {
- stage(‘Cloning Git’) {
- steps {
- git([url: ‘https://github.com/Paramvir12121/cicd-jenkins-nginx.git', branch: ‘main’])
- }
- }
- stage(‘Building image’) {
- steps{
- script {
- dockerImage = docker.build imagename
- }
- }
- }
- stage(‘Running image’) {
- steps{
- script {
- sh “docker run ${imagename}:latest”
- }
- }
- }
- stage(‘Deploy Image’) {
- steps{
- script {
- docker.withRegistry( ‘’, registryCredential ) {
- dockerImage.push(“$BUILD_NUMBER”)
- dockerImage.push(‘latest’)
- }
- }
- }
- }
- }
+
+  environment {
+    dockerimagename = "n01479079/nginx-webserver"
+    dockerImage = ""
+  }
+
+  agent any
+
+  stages {
+
+    stage('Checkout Source') {
+      steps {
+        git 'https://github.com:Paramvir12121/cicd-jenkins-nginx.git'
+      }
+    }
+
+    stage('Build image') {
+      steps{
+        script {
+          dockerImage = docker.build dockerimagename
+        }
+      }
+    }
+
+    stage('Pushing Image') {
+      environment {
+               registryCredential = 'dockerhublogin'
+           }
+      steps{
+        script {
+          docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+            dockerImage.push("latest")
+          }
+        }
+      }
+    }
+
+    stage('Deploying React.js container to Kubernetes') {
+      steps {
+        script {
+          kubernetesDeploy(configs: "deploymentservice.yaml")
+        }
+      }
+    }
+
+  }
+
 }
