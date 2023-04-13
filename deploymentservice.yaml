@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-webserver
+  template:
+    metadata:
+      labels:
+        app: nginx-webserver
+      annotations:
+        pod-name-prefix: "nginx-webserver"
+    spec:
+      containers:
+        - name: nginx-webserver
+          image: n01479079/nginx-webserver
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 250m
+              memory: 128Mi
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-webserver
+spec:
+  selector:
+    app: nginx-webserver
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
